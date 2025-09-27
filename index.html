@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Sound of Thunder - ELA Escape Room</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 2px solid #ffd700;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin: 10px 0;
+            color: #e0e0e0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #ffed4e);
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .scene {
+            display: none;
+            background: rgba(0,0,0,0.4);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            border: 2px solid #4a90e2;
+        }
+
+        .scene.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .scene h2 {
+            color: #ffd700;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .challenge {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #ffd700;
+        }
+
+        .question {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .option {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid transparent;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .option:hover {
+            background: rgba(255,255,255,0.3);
+            border-color: #ffd700;
+            transform: translateY(-2px);
+        }
+
+        .option.correct {
+            background: rgba(76, 175, 80, 0.3);
+            border-color: #4caf50;
+        }
+
+        .option.incorrect {
+            background: rgba(244, 67, 54, 0.3);
+            border-color: #f44336;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #4a90e2;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 1rem;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+
+        .input-field::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn.teacher {
+            background: linear-gradient(45deg, #8e44ad, #9b59b6);
+            color: white;
+        }
+
+        .feedback {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .feedback.correct {
+            background: rgba(76, 175, 80, 0.2);
+            border: 2px solid #4caf50;
+            color: #4caf50;
+        }
+
+        .feedback.incorrect {
+            background: rgba(244, 67, 54, 0.2);
+            border: 2px solid #f44336;
+            color: #f44336;
+        }
+
+        .timer {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ffd700;
+            font-size: 1.2rem;
+            font-weight: bold;
+            z-index: 1000;
+        }
+
+        .completion-screen {
+            display: none;
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .completion-screen.show {
+            display: block;
+        }
+
+        .trophy {
+            font-size: 4rem;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .scene {
+                padding: 15px;
+            }
+            
+            .options {
+                grid-template-columns: 1fr;
+            }
+            
+            .timer {
+                position: relative;
+                top: auto;
+                right: auto;
+                margin: 10px auto;
+                display: block;
+                width: fit-content;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="timer" id="timer">⏰ Time: 00:00</div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🦕 A Sound of Thunder 🦕</h1>
+            <div class="subtitle">Interactive ELA Escape Room</div>
+            <div class="subtitle">Escape through time by mastering the story elements!</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div style="margin-top: 15px;">
+                <button class="btn" onclick="startGame()">🎯 Start Adventure</button>
+                <button class="btn" onclick="exportData()">📊 Export Progress</button>
+                <button class="btn teacher" onclick="showTeacherDashboard()">👩‍🏫 Teacher Dashboard</button>
+            </div>
+        </div>
+
+        <!-- Scene 1: Time Safari Office -->
+        <div class="scene active" id="scene1">
+            <h2>🏢 Time Safari Inc. Office</h2>
+            
+            <div class="challenge">
+                <div class="question">
+                    <strong>📚 Character Analysis Challenge</strong><br>
+                    What type of character is Eckels in "A Sound of Thunder"?
+                </div>
+                
+                <div class="options">
+                    <div class="option" data-correct="false" onclick="selectAnswer(this, false, 'characterAnalysis')">A brave and experienced hunter</div>
+                    <div class="option" data-correct="true" onclick="selectAnswer(this, true, 'characterAnalysis')">A nervous and impulsive person</div>
+                    <div class="option" data-correct="false" onclick="selectAnswer(this, false, 'characterAnalysis')">A calm and rational thinker</div>
+                    <div class="option" data-correct="false" onclick="selectAnswer(this, false, 'characterAnalysis')">A professional time guide</div>
+                </div>
+                
+                <div class="feedback" id="feedback1"></div>
+            </div>
+
+            <div class="challenge">
+                <div class="question">
+                    <strong>🌍 Setting Analysis</strong><br>
+                    Describe the setting of the story. What year does it take place and where do they travel?
+                </div>
+                
+                <textarea class="input-field" id="settingAnswer" placeholder="Write your answer here (minimum 50 words)..."></textarea>
+                <button class="btn" onclick="checkSettingAnswer()">Submit Answer</button>
+                <div class="feedback" id="feedback1b"></div>
+            </div>
+        </div>
+
+        <!-- Scene 2: The Prehistoric Jungle -->
+        <div class="scene" id="scene2">
+            <h2>🌿 Cretaceous Period Jungle</h2>
+            
+            <div class="challenge">
+                <div class="question">
+                    <strong>📖 Vocabulary Challenge</strong><br>
+                    What does "infinitesimally" mean in context?
+                </div>
+                
+                <div class="options">
+                    <div class="option" data-correct="false" onclick="selectAnswer(this, false, 'vocabulary')">Extremely large</div>
+                    <div class="option" data-correct="true" onclick="selectAnswer(this, true, 'vocabulary')">Extremely small</div>
+                    <div class="option" data-correct="false" onclick="selectAnswer(this, false, 'vocabulary')">Very quickly</div>
+                    <div class="option" data-correct="false" onclick="selectAnswer(this, false, 'vocabulary')">Very slowly</div>
+                </div>
+                
+                <div class="feedback" id="feedback2a"></div>
+            </div>
+
+            <div class="challenge">
+                <div class="question">
+                    <strong>🔍 Critical Thinking</strong><br>
+                    Why is staying on the Path so important? Explain the consequences of stepping off.
+                </div>
+                
+                <textarea class="input-field" id="pathAnswer" placeholder="Explain your reasoning (minimum 75 words)..."></textarea>
+                <button class="btn" onclick="checkPathAnswer()">Submit Analysis</button>
+                <div class="feedback" id="feedback2b"></div>
+            </div>
+        </div>
+
+        <!-- Scene 3: The Butterfly Incident -->
+        <div class="scene" id="scene3">
+            <h2>🦋 The Critical Moment</h2>
+            
+            <div class="challenge">
+                <div class="question">
+                    <strong>🎨 Literary Device Identification</strong><br>
+                    "It fell to the floor, an exquisite thing, a small thing that could upset balances and knock down a line of small dominoes..."<br><br>
+                    What literary device is Bradbury using here?
+                </div>
+                
+                <div class="options">
+                    <div class="option" data-correct="false" onclick="selectAnswer(this, false, 'literaryDevice')">Simile</div>
+                    <div class="option" data-correct="true" onclick="selectAnswer(this, true, 'literaryDevice')">Metaphor</div>
+                    <div class="option" data-correct="false" onclick="selectAnswer(this, false, 'literaryDevice')">Personification</div>
+                    <div class="option" data-correct="false" onclick="selectAnswer(this, false, 'literaryDevice')">Alliteration</div>
+                </div>
+                
+                <div class="feedback" id="feedback3a"></div>
+            </div>
+
+            <div class="challenge">
+                <div class="question">
+                    <strong>💭 Theme Analysis</strong><br>
+                    What is the main theme of "A Sound of Thunder"? Support your answer with evidence.
+                </div>
+                
+                <textarea class="input-field" id="themeAnswer" placeholder="State the theme and provide evidence from the text (minimum 100 words)..."></textarea>
+                <button class="btn" onclick="checkThemeAnswer()">Submit Theme Analysis</button>
+                <div class="feedback" id="feedback3b"></div>
+            </div>
+        </div>
+
+        <!-- Scene 4: Return to the Future -->
+        <div class="scene" id="scene4">
+            <h2>🔮 Back to 2055</h2>
+            
+            <div class="challenge">
+                <div class="question">
+                    <strong>📝 Compare and Contrast</strong><br>
+                    How has the world changed when they return to 2055? List at least 3 specific differences.
+                </div>
+                
+                <textarea class="input-field" id="changesAnswer" placeholder="List and explain the changes (minimum 75 words)..."></textarea>
+                <button class="btn" onclick="checkChangesAnswer()">Submit Comparison</button>
+                <div class="feedback" id="feedback4a"></div>
+            </div>
+
+            <div class="challenge">
+                <div class="question">
+                    <strong>✍️ Argumentative Writing</strong><br>
+                    Do you think Eckels deserved his fate at the end of the story? Write a paragraph arguing your position with evidence from the text.
+                </div>
+                
+                <textarea class="input-field" id="argumentAnswer" placeholder="Write your argument with evidence (minimum 150 words)..."></textarea>
+                <button class="btn" onclick="checkArgumentAnswer()">Submit Final Argument</button>
+                <div class="feedback" id="feedback4b"></div>
+            </div>
+        </div>
+
+        <!-- Completion Screen -->
+        <div class="completion-screen" id="completionScreen">
+            <div class="trophy">🏆</div>
+            <h2>Congratulations! You've Escaped Through Time!</h2>
+            <p>You've successfully navigated through Ray Bradbury's "A Sound of Thunder" and demonstrated mastery of key ELA standards!</p>
+            <p><strong>Final Time: <span id="finalTime"></span></strong></p>
+            <p><strong>Score: <span id="finalScore"></span>/8</strong></p>
+            <button class="btn" onclick="restartGame()">🔄 Play Again</button>
+            <button class="btn" onclick="exportData()">📊 Export Results</button>
+        </div>
+    </div>
+
+    <script>
+        let currentScene = 1;
+        let startTime = null;
+        let gameCompleted = false;
+        let correctAnswers = 0;
+        let studentData = {
+            studentName: '',
+            startTime: new Date().toISOString(),
+            responses: {},
+            scores: {
+                characterAnalysis: 0,
+                setting: 0,
+                vocabulary: 0,
+                pathAnalysis: 0,
+                literaryDevice: 0,
+                theme: 0,
+                comparison: 0,
+                argument: 0
+            },
+            totalScore: 0,
+            timeSpent: 0,
+            completed: false
+        };
+
+        function saveStudentProgress() {
+            if (!studentData.studentName) return;
+            
+            studentData.timeSpent = Date.now() - startTime;
+            localStorage.setItem('student_' + studentData.studentName, JSON.stringify(studentData));
+            
+            let allStudents = JSON.parse(localStorage.getItem('allStudentData') || '[]');
+            const existingIndex = allStudents.findIndex(s => s.studentName === studentData.studentName);
+            
+            if (existingIndex >= 0) {
+                allStudents[existingIndex] = studentData;
+            } else {
+                allStudents.push(studentData);
+            }
+            
+            localStorage.setItem('allStudentData', JSON.stringify(allStudents));
+        }
+
+        function showTeacherDashboard() {
+            const password = prompt("Enter teacher password:");
+            if (password === "bradbury2024") {
+                openTeacherDashboard();
+            } else if (password !== null) {
+                alert("Incorrect password. Contact your teacher for access.");
+            }
+        }
+
+        function openTeacherDashboard() {
+            const allStudentData = JSON.parse(localStorage.getItem('allStudentData') || '[]');
+            
+            const dashboardHTML = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Teacher Dashboard - A Sound of Thunder</title>
+                <style>
+                    body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+                    .dashboard { max-width: 1200px; margin: 0 auto; }
+                    .header { background: #2c3e50; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+                    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+                    .stat-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+                    .student-list { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+                    .student-row { display: grid; grid-template-columns: 200px 100px 100px 150px 150px 100px; gap: 10px; padding: 15px; border-bottom: 1px solid #eee; align-items: center; }
+                    .student-row:nth-child(even) { background: #f9f9f9; }
+                    .student-row.header { background: #34495e; color: white; font-weight: bold; }
+                    .progress-bar { width: 100%; height: 20px; background: #ecf0f1; border-radius: 10px; overflow: hidden; }
+                    .progress-fill { height: 100%; background: linear-gradient(90deg, #3498db, #2ecc71); transition: width 0.3s; }
+                    .btn { background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin: 2px; }
+                    .btn:hover { background: #2980b9; }
+                    .score-good { color: #27ae60; font-weight: bold; }
+                    .score-needs-work { color: #e74c3c; font-weight: bold; }
+                </style>
+            </head>
+            <body>
+                <div class="dashboard">
+                    <div class="header">
+                        <h1>📊 Teacher Dashboard - A Sound of Thunder Escape Room</h1>
+                        <p>Real-time student progress and response tracking</p>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>📈 Overall Statistics</h3>
+                            <p><strong>Total Students:</strong> ${allStudentData.length}</p>
+                            <p><strong>Completed:</strong> ${allStudentData.filter(s => s.completed).length}</p>
+                            <p><strong>In Progress:</strong> ${allStudentData.filter(s => !s.completed && Object.keys(s.responses).length > 0).length}</p>
+                            <p><strong>Average Score:</strong> ${allStudentData.length > 0 ? Math.round(allStudentData.reduce((acc, s) => acc + s.totalScore, 0) / allStudentData.length * 100 / 8) : 0}%</p>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <h3>⏱️ Time Analytics</h3>
+                            <p><strong>Average Time:</strong> ${allStudentData.length > 0 ? Math.round(allStudentData.reduce((acc, s) => acc + s.timeSpent, 0) / allStudentData.length / 60000) : 0} minutes</p>
+                            <p><strong>Fastest Completion:</strong> ${allStudentData.filter(s => s.completed).length > 0 ? Math.min(...allStudentData.filter(s => s.completed).map(s => Math.round(s.timeSpent / 60000))) : 0} minutes</p>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <h3>🎯 Standards Mastery</h3>
+                            <p><strong>Character Analysis:</strong> ${allStudentData.length > 0 ? Math.round(allStudentData.filter(s => s.scores.characterAnalysis > 0).length / allStudentData.length * 100) : 0}%</p>
+                            <p><strong>Theme Analysis:</strong> ${allStudentData.length > 0 ? Math.round(allStudentData.filter(s => s.scores.theme > 0).length / allStudentData.length * 100) : 0}%</p>
+                            <p><strong>Argumentative Writing:</strong> ${allStudentData.length > 0 ? Math.round(allStudentData.filter(s => s.scores.argument > 0).length / allStudentData.length * 100) : 0}%</p>
+                        </div>
+                    </div>
+                    
+                    <div class="student-list">
+                        <div class="student-row header">
+                            <div>Student Name</div>
+                            <div>Progress</div>
+                            <div>Score</div>
+                            <div>Time Spent</div>
+                            <div>Last Activity</div>
+                            <div>Actions</div>
+                        </div>
+                        ${allStudentData.map(student => `
+                            <div class="student-row">
+                                <div><strong>${student.studentName}</strong></div>
+                                <div>
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${student.totalScore / 8 * 100}%"></div>
+                                    </div>
+                                    ${student.totalScore}/8
+                                </div>
+                                <div class="${student.totalScore >= 6 ? 'score-good' : 'score-needs-work'}">${Math.round(student.totalScore / 8 * 100)}%</div>
+                                <div>${Math.round(student.timeSpent / 60000)} min</div>
+                                <div>${new Date(student.startTime).toLocaleTimeString()}</div>
+                                <div>
+                                    <button class="btn" onclick="viewStudentDetails('${student.studentName}')">View Details</button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div style="margin-top: 30px; text-align: center;">
+                        <button class="btn" onclick="exportAllData()" style="background: #27ae60;">📊 Export All Data</button>
+                        <button class="btn" onclick="window.print()" style="background: #8e44ad;">🖨️ Print Report</button>
+                        <button class="btn" onclick="location.reload()" style="background: #f39c12;">🔄 Refresh Data</button>
+                    </div>
+                </div>
+                
+                <script>
+                    const allData = ${JSON.stringify(allStudentData)};
+                    
+                    function viewStudentDetails(studentName) {
+                        const student = allData.find(s => s.studentName === studentName);
+                        if (student) {
+                            let details = 'Student: ' + student.studentName + '\\n\\n';
+                            details += 'Responses:\\n';
+                            Object.keys(student.responses).forEach(key => {
+                                details += key + ': ' + student.responses[key] + '\\n\\n';
+                            });
+                            alert(details);
+                        }
+                    }
+                    
+                    function exportAllData() {
+                        const csv = convertToCSV(allData);
+                        const blob = new Blob([csv], { type: 'text/csv' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = 'sound_of_thunder_class_data.csv';
+                        a.click();
+                    }
+                    
+                    function convertToCSV(data) {
+                        const headers = ['Name', 'Character Analysis', 'Setting', 'Vocabulary', 'Path Analysis', 'Literary Device', 'Theme', 'Comparison', 'Argument', 'Total Score', 'Time (minutes)', 'Completed'];
+                        const rows = data.map(student => [
+                            student.studentName,
+                            student.scores.characterAnalysis,
+                            student.scores.setting,
+                            student.scores.vocabulary,
+                            student.scores.pathAnalysis,
+                            student.scores.literaryDevice,
+                            student.scores.theme,
+                            student.scores.comparison,
+                            student.scores.argument,
+                            student.totalScore,
+                            Math.round(student.timeSpent / 60000),
+                            student.completed ? 'Yes' : 'No'
+                        ]);
+                        
+                        return [headers, ...rows].map(row => row.join(',')).join('\\n');
+                    }
+                <\/script>
+            <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'985bc9c3971bf265',t:'MTc1ODk4NDM2MS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();<\/script></body>
+            </html>`;
+            
+            const dashboardWindow = window.open('', '_blank', 'width=1200,height=800');
+            dashboardWindow.document.write(dashboardHTML);
+        }
+
+        function startGame() {
+            const name = prompt("Please enter your name to begin the escape room:");
+            if (name && name.trim()) {
+                studentData.studentName = name.trim();
+                document.querySelector('.subtitle').innerHTML = 'Welcome, ' + studentData.studentName + '! Escape through time by mastering the story elements!';
+                startTime = Date.now();
+        gameCompleted = false;
+        updateTimer();
+            }
+        }
+
+        function updateTimer() {
+            if (!gameCompleted) {
+                const elapsed = Date.now() - startTime;
+                const minutes = Math.floor(elapsed / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                document.getElementById('timer').textContent = 
+                    '⏰ Time: ' + minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
+                setTimeout(updateTimer, 1000);
+            }
+        }
+
+        function updateProgress() {
+            const progress = (correctAnswers / 8) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function selectAnswer(element, isCorrect, skillType) {
+            const options = element.parentNode.querySelectorAll('.option');
+            const feedback = element.closest('.challenge').querySelector('.feedback');
+            
+            options.forEach(opt => opt.style.pointerEvents = 'none');
+            
+            if (isCorrect) {
+                element.classList.add('correct');
+                feedback.textContent = '✅ Correct! Great job understanding the story elements.';
+                feedback.className = 'feedback correct';
+                correctAnswers++;
+                
+                studentData.scores[skillType] = 1;
+                studentData.responses[skillType] = element.textContent;
+                studentData.totalScore = correctAnswers;
+                saveStudentProgress();
+                updateProgress();
+                
+                setTimeout(() => {
+                    const nextChallenge = element.closest('.challenge').nextElementSibling;
+                    if (nextChallenge && nextChallenge.classList.contains('challenge')) {
+                        nextChallenge.scrollIntoView({behavior: 'smooth'});
+                    } else {
+                        nextScene();
+                    }
+                }, 2000);
+            } else {
+                element.classList.add('incorrect');
+                options.forEach(opt => {
+                    if (opt.dataset && opt.dataset.correct === 'true') {
+                        opt.classList.add('correct');
+                    }
+                });
+                feedback.textContent = '❌ Not quite right. Study the correct answer and try the next challenge!';
+                feedback.className = 'feedback incorrect';
+                
+                studentData.responses[skillType] = element.textContent;
+                saveStudentProgress();
+                
+                setTimeout(() => {
+                    options.forEach(opt => {
+                        opt.style.pointerEvents = 'auto';
+                        opt.classList.remove('correct', 'incorrect');
+                    });
+                }, 3000);
+            }
+        }
+
+        function checkSettingAnswer() {
+            const answer = document.getElementById('settingAnswer').value.trim();
+            const feedback = document.getElementById('feedback1b');
+            
+            if (answer.length < 50) {
+                feedback.textContent = '❌ Please provide a more detailed answer (minimum 50 words).';
+                feedback.className = 'feedback incorrect';
+                return;
+            }
+
+            const keywords = ['2055', 'future', 'prehistoric', 'cretaceous', 'dinosaur', 'time travel'];
+            const hasKeywords = keywords.some(keyword => 
+                answer.toLowerCase().includes(keyword.toLowerCase())
+            );
+
+            if (hasKeywords) {
+                feedback.textContent = '✅ Excellent! You understand the story\'s setting and time travel concept.';
+                feedback.className = 'feedback correct';
+                correctAnswers++;
+                studentData.scores.setting = 1;
+                studentData.responses.setting = answer;
+                studentData.totalScore = correctAnswers;
+                saveStudentProgress();
+                updateProgress();
+                setTimeout(nextScene, 2000);
+            } else {
+                feedback.textContent = '❌ Good start! Try to include details about the year 2055 and the prehistoric time period.';
+                feedback.className = 'feedback incorrect';
+                studentData.responses.setting = answer;
+                saveStudentProgress();
+            }
+        }
+
+        function checkPathAnswer() {
+            const answer = document.getElementById('pathAnswer').value.trim();
+            const feedback = document.getElementById('feedback2b');
+            
+            if (answer.length < 75) {
+                feedback.textContent = '❌ Please provide a more detailed answer (minimum 75 words).';
+                feedback.className = 'feedback incorrect';
+                return;
+            }
+
+            const keywords = ['butterfly effect', 'change', 'future', 'consequences', 'time', 'impact', 'domino'];
+            const hasKeywords = keywords.some(keyword => 
+                answer.toLowerCase().includes(keyword.toLowerCase())
+            );
+
+            if (hasKeywords) {
+                feedback.textContent = '✅ Great analysis! You understand the importance of not disturbing the past.';
+                feedback.className = 'feedback correct';
+                correctAnswers++;
+                studentData.scores.pathAnalysis = 1;
+                studentData.responses.pathAnalysis = answer;
+                studentData.totalScore = correctAnswers;
+                saveStudentProgress();
+                updateProgress();
+                setTimeout(nextScene, 2000);
+            } else {
+                feedback.textContent = '❌ Good thinking! Try to include concepts like the butterfly effect and consequences.';
+                feedback.className = 'feedback incorrect';
+                studentData.responses.pathAnalysis = answer;
+                saveStudentProgress();
+            }
+        }
+
+        function checkThemeAnswer() {
+            const answer = document.getElementById('themeAnswer').value.trim();
+            const feedback = document.getElementById('feedback3b');
+            
+            if (answer.length < 100) {
+                feedback.textContent = '❌ Please provide a more detailed analysis (minimum 100 words).';
+                feedback.className = 'feedback incorrect';
+                return;
+            }
+
+            const keywords = ['butterfly effect', 'consequences', 'small actions', 'big changes', 'responsibility', 'cause and effect'];
+            const hasKeywords = keywords.some(keyword => 
+                answer.toLowerCase().includes(keyword.toLowerCase())
+            );
+
+            if (hasKeywords) {
+                feedback.textContent = '✅ Excellent theme analysis! You\'ve identified the central message of the story.';
+                feedback.className = 'feedback correct';
+                correctAnswers++;
+                studentData.scores.theme = 1;
+                studentData.responses.theme = answer;
+                studentData.totalScore = correctAnswers;
+                saveStudentProgress();
+                updateProgress();
+                setTimeout(nextScene, 2000);
+            } else {
+                feedback.textContent = '❌ Good effort! Focus on how small actions can have massive consequences.';
+                feedback.className = 'feedback incorrect';
+                studentData.responses.theme = answer;
+                saveStudentProgress();
+            }
+        }
+
+        function checkChangesAnswer() {
+            const answer = document.getElementById('changesAnswer').value.trim();
+            const feedback = document.getElementById('feedback4a');
+            
+            if (answer.length < 75) {
+                feedback.textContent = '❌ Please provide more detail (minimum 75 words).';
+                feedback.className = 'feedback incorrect';
+                return;
+            }
+
+            const keywords = ['election', 'language', 'spelling', 'deutscher', 'keith', 'atmosphere', 'sign'];
+            const keywordCount = keywords.filter(keyword => 
+                answer.toLowerCase().includes(keyword.toLowerCase())
+            ).length;
+
+            if (keywordCount >= 2) {
+                feedback.textContent = '✅ Great comparison! You noticed the key changes in the timeline.';
+                feedback.className = 'feedback correct';
+                correctAnswers++;
+                studentData.scores.comparison = 1;
+                studentData.responses.comparison = answer;
+                studentData.totalScore = correctAnswers;
+                saveStudentProgress();
+                updateProgress();
+                
+                setTimeout(() => {
+                    document.querySelector('#scene4 .challenge:last-child').scrollIntoView({behavior: 'smooth'});
+                }, 1500);
+            } else {
+                feedback.textContent = '❌ Good start! Think about the election results, language changes, and atmosphere.';
+                feedback.className = 'feedback incorrect';
+                studentData.responses.comparison = answer;
+                saveStudentProgress();
+            }
+        }
+
+        function checkArgumentAnswer() {
+            const answer = document.getElementById('argumentAnswer').value.trim();
+            const feedback = document.getElementById('feedback4b');
+            
+            if (answer.length < 150) {
+                feedback.textContent = '❌ Please write a more detailed argument (minimum 150 words).';
+                feedback.className = 'feedback incorrect';
+                return;
+            }
+
+            const hasPosition = answer.toLowerCase().includes('deserve') || 
+                               answer.toLowerCase().includes('fault') ||
+                               answer.toLowerCase().includes('responsible');
+            
+            const hasEvidence = answer.toLowerCase().includes('text') ||
+                               answer.toLowerCase().includes('story') ||
+                               answer.toLowerCase().includes('bradbury');
+
+            if (hasPosition && hasEvidence) {
+                feedback.textContent = '✅ Outstanding argument! You\'ve supported your position with evidence.';
+                feedback.className = 'feedback correct';
+                correctAnswers++;
+                studentData.scores.argument = 1;
+                studentData.responses.argument = answer;
+                studentData.totalScore = correctAnswers;
+                saveStudentProgress();
+                updateProgress();
+                setTimeout(showCompletion, 2000);
+            } else {
+                feedback.textContent = '❌ Good effort! Make sure to state your position clearly and support it with text evidence.';
+                feedback.className = 'feedback incorrect';
+                studentData.responses.argument = answer;
+                saveStudentProgress();
+            }
+        }
+
+        function nextScene() {
+            document.getElementById('scene' + currentScene).classList.remove('active');
+            currentScene++;
+            if (currentScene <= 4) {
+                document.getElementById('scene' + currentScene).classList.add('active');
+                document.getElementById('scene' + currentScene).scrollIntoView({behavior: 'smooth'});
+            } else {
+                showCompletion();
+            }
+        }
+
+        function showCompletion() {
+            gameCompleted = true;
+            const elapsed = Date.now() - startTime;
+            const minutes = Math.floor(elapsed / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+            
+            document.getElementById('finalTime').textContent = 
+                minutes.toString().padStart(2, '0') + ':' + seconds.toString().padStart(2, '0');
+            document.getElementById('finalScore').textContent = correctAnswers;
+            
+            studentData.totalScore = correctAnswers;
+            studentData.timeSpent = elapsed;
+            studentData.completed = true;
+            saveStudentProgress();
+            
+            document.getElementById('completionScreen').classList.add('show');
+            document.querySelectorAll('.scene').forEach(scene => scene.style.display = 'none');
+        }
+
+        function exportData() {
+            const dataStr = JSON.stringify(studentData, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = (studentData.studentName || 'Student') + '_SoundOfThunder_' + new Date().toISOString().split('T')[0] + '.json';
+            link.click();
+        }
+
+        function restartGame() {
+            currentScene = 1;
+            correctAnswers = 0;
+            gameCompleted = false;
+            startTime = Date.now();
+            
+            document.getElementById('completionScreen').classList.remove('show');
+            document.querySelectorAll('.scene').forEach(scene => {
+                scene.classList.remove('active');
+                scene.style.display = 'block';
+            });
+            document.getElementById('scene1').classList.add('active');
+            
+            document.querySelectorAll('.input-field').forEach(input => input.value = '');
+            document.querySelectorAll('.feedback').forEach(feedback => {
+                feedback.textContent = '';
+                feedback.className = 'feedback';
+            });
+            document.querySelectorAll('.option').forEach(option => {
+                option.classList.remove('correct', 'incorrect');
+                option.style.pointerEvents = 'auto';
+            });
+            
+            updateProgress();
+            updateTimer();
+        }
+
+        window.onload = function() {
+            document.getElementById('timer').textContent = '⏰ Time: 00:00';
+        };
+    </script>
+</body>
+</html>
